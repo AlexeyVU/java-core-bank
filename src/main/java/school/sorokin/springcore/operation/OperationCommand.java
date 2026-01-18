@@ -1,4 +1,6 @@
-package school.sorokin.springcore.service;
+package school.sorokin.springcore.operation;
+
+import school.sorokin.springcore.service.ConsoleOperationType;
 
 public interface OperationCommand {
     void execute();
