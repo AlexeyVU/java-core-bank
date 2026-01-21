@@ -31,6 +31,6 @@ public class UserCreateCommand implements OperationCommand{
 
     @Override
     public ConsoleOperationType getConsoleOperationType() {
-        return ConsoleOperationType.USER_CREAT;
+        return ConsoleOperationType.USER_CREATE;
     }
 }

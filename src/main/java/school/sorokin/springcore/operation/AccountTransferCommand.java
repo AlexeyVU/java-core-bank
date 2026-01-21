@@ -6,6 +6,7 @@ import school.sorokin.springcore.service.AccountService;
 import school.sorokin.springcore.service.ConsoleOperationType;
 import school.sorokin.springcore.service.UserService;
 
+import java.math.BigDecimal;
 import java.util.Scanner;
 
 @Component
@@ -27,8 +28,8 @@ public class AccountTransferCommand implements OperationCommand {
         System.out.println("Enter ID to account");
         int toAccountId = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter money count for transfer between account");
-        int money = Integer.parseInt(scanner.nextLine());
-        if (money <= 0) {
+        BigDecimal money = BigDecimal.valueOf(Integer.parseInt(scanner.nextLine()));
+        if (money.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("insufficient funds in the account");
         }
         accountService.transfer(fromAccountId, toAccountId, money);

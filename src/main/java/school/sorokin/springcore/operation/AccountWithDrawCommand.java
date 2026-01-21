@@ -6,6 +6,7 @@ import school.sorokin.springcore.service.AccountService;
 import school.sorokin.springcore.service.ConsoleOperationType;
 import school.sorokin.springcore.service.UserService;
 
+import java.math.BigDecimal;
 import java.util.Scanner;
 
 @Component
@@ -25,7 +26,7 @@ public class AccountWithDrawCommand implements OperationCommand {
         System.out.println("Enter account ID ");
         int accountId = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter count money for draw ");
-        int money = Integer.parseInt(scanner.nextLine());
+        BigDecimal money = BigDecimal.valueOf(Integer.parseInt(scanner.nextLine()));
         accountService.withDrawAccount(accountId, money);
     }
 

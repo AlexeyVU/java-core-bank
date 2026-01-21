@@ -11,5 +11,5 @@ public enum ConsoleOperationType {
     ACCOUNT_WITHDRAW,
     ACCOUNT_DEPOSIT,
     ACCOUNT_TRANSFER,
-    USER_CREAT;
+    USER_CREATE;
 }

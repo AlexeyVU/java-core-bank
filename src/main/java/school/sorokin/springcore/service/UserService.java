@@ -6,10 +6,11 @@ import school.sorokin.springcore.model.Account;
 import school.sorokin.springcore.model.User;
 
 import java.util.*;
-
+@Service
 public class UserService {
     private final Map<Integer, User> userMap;
     private final Set<String> loginUser;
+
     private final AccountService accountService;
     private int idCount;
 

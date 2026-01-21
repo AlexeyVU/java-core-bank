@@ -1,5 +1,7 @@
 package school.sorokin.springcore.model;
 
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 
 public class User {

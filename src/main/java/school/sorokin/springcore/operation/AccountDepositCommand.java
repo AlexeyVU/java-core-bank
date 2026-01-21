@@ -6,6 +6,7 @@ import school.sorokin.springcore.service.AccountService;
 import school.sorokin.springcore.service.ConsoleOperationType;
 import school.sorokin.springcore.service.UserService;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Scanner;
 
@@ -29,8 +30,8 @@ public class AccountDepositCommand implements OperationCommand {
         Account accountFrom = accountService.findAccountById(accountToId)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found"));
         System.out.println("create money count");
-        int money = Integer.parseInt(scanner.nextLine());
-        int moneyAmount = accountFrom.getMoneyAmount() + money;
+        BigDecimal money = BigDecimal.valueOf(Integer.parseInt(scanner.nextLine()));
+        BigDecimal moneyAmount = accountFrom.getMoneyAmount().add(money);
         accountService.accountRepl(accountToId, money);
 
     }

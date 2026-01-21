@@ -5,11 +5,11 @@ import school.sorokin.springcore.operation.OperationCommand;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
+@Component
 public class OperationConsoleListener {
 
     private final Map<ConsoleOperationType, OperationCommand> commandMap;
-    //private final List<ConsoleOperationType> consoList;
+
     private final Scanner scanner;
     public OperationConsoleListener
             (List<OperationCommand> consoleList, Scanner scanner) {
@@ -33,15 +33,17 @@ public class OperationConsoleListener {
 
             public void engine() {
                 System.out.println("Please enter one of operation type: ");
-                getAllOperationType();
-                while (true) {
-                    String nextOperation = scanner.nextLine();
-                    nextOperation(ConsoleOperationType.valueOf(nextOperation));
+
                     try {
+                        getAllOperationType();
+                        while (true) {
+                            String nextOperation = scanner.nextLine();
+                            nextOperation(ConsoleOperationType.valueOf(nextOperation));
                          ConsoleOperationType.valueOf(nextOperation);
-                    } catch (IllegalArgumentException e) {
+                         }
+
+                        } catch (IllegalArgumentException e) {
                         System.out.println("Command not found");
-                    }
                 }
             }
 

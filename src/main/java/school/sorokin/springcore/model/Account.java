@@ -1,14 +1,15 @@
 package school.sorokin.springcore.model;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 public class Account {
     private final int id;
     private final int userId;
-    private int moneyAmount;
+    private BigDecimal moneyAmount;
 
 
-    public Account(int id, int userId, int moneyAmount) {
+    public Account(int id, int userId, BigDecimal moneyAmount) {
         this.id = id;
         this.userId = userId;
         this.moneyAmount = moneyAmount;
@@ -23,11 +24,11 @@ public class Account {
         return userId;
     }
 
-    public int getMoneyAmount() {
+    public BigDecimal getMoneyAmount() {
         return moneyAmount;
     }
 
-    public void setMoneyAmount(int moneyAmount) {
+    public void setMoneyAmount(BigDecimal moneyAmount) {
         this.moneyAmount = moneyAmount;
     }
 
