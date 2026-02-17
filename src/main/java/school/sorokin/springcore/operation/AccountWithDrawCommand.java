@@ -24,7 +24,7 @@ public class AccountWithDrawCommand implements OperationCommand {
     @Override
     public void execute() {
         System.out.println("Enter account ID ");
-        int accountId = Integer.parseInt(scanner.nextLine());
+        Long accountId = Long.parseLong(scanner.nextLine());
         System.out.println("Enter count money for draw ");
         BigDecimal money = BigDecimal.valueOf(Integer.parseInt(scanner.nextLine()));
         accountService.withDrawAccount(accountId, money);

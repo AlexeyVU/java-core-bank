@@ -24,7 +24,7 @@ public class AccountCreateCommand implements OperationCommand {
     @Override
     public void execute() {
         System.out.println("Enter user ID");
-        int userId = Integer.parseInt(scanner.nextLine());
+        Long userId = Long.parseLong(scanner.nextLine());
         User user = userService.findUserById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         Account account = accountService.createAccount(user);

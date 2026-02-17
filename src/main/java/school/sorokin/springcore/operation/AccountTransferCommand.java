@@ -24,11 +24,11 @@ public class AccountTransferCommand implements OperationCommand {
     @Override
     public void execute() {
         System.out.println("Enter ID from account");
-        int fromAccountId = Integer.parseInt(scanner.nextLine());
+        Long fromAccountId = Long.parseLong(scanner.nextLine());
         System.out.println("Enter ID to account");
-        int toAccountId = Integer.parseInt(scanner.nextLine());
+        Long toAccountId = Long.parseLong(scanner.nextLine());
         System.out.println("Enter money count for transfer between account");
-        BigDecimal money = BigDecimal.valueOf(Integer.parseInt(scanner.nextLine()));
+        BigDecimal money = BigDecimal.valueOf(Long.parseLong(scanner.nextLine()));
         if (money.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("insufficient funds in the account");
         }

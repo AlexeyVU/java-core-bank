@@ -25,12 +25,12 @@ public class AccountCloseCommand implements OperationCommand {
     @Override
     public void execute() {
         System.out.println("Enter accountId to close");
-        int accountId = Integer.parseInt(scanner.nextLine());
+        long accountId = Long.parseLong(scanner.nextLine());
         Account account = accountService.findAccountById(accountId)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found"));
 
         accountService.deleteAccount(accountId);
-        User user = userService.findUserById(account.getUserId())
+        User user = userService.findUserById(account.getUser().getId())
                         .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         System.out.println("Account close");

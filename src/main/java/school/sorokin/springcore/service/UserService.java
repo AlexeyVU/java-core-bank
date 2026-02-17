@@ -1,46 +1,64 @@
 package school.sorokin.springcore.service;
 
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import school.sorokin.springcore.AccountProperties;
 import school.sorokin.springcore.model.Account;
 import school.sorokin.springcore.model.User;
-
+import java.util.Optional;
 import java.util.*;
+
 @Service
 public class UserService {
-    private final Map<Integer, User> userMap;
-    private final Set<String> loginUser;
+
 
     private final AccountService accountService;
-    private int idCount;
+    private final SessionFactory sessionFactory;
+    private final AccountProperties accountProperties;
 
-    public UserService(AccountService accountService) {
+
+    public UserService(AccountService accountService, SessionFactory sessionFactory, AccountProperties accountProperties) {
         this.accountService = accountService;
-        this.userMap = new HashMap<>();
-        this.idCount = 0;
-        this.loginUser = new HashSet<>();
+        this.sessionFactory = sessionFactory;
+        this.accountProperties = accountProperties;
+
     }
     //Создание пользователя
     public User createUser(String login) {
-        if (loginUser.contains(login)) {
-            throw new IllegalArgumentException("User is exist");
-        }
-        loginUser.add(login);
-        idCount++;
-        User newUser = new User(idCount, login, new ArrayList<>());
-        Account newAccount = accountService.createAccount(newUser);
-        newUser.getAccountList().add(newAccount);
-        userMap.put(idCount, newUser);
-        System.out.println();
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        User user = new User(null, login, new ArrayList<>());
+        session.persist(user);
+        Account newAccount = new Account(null, user, accountProperties.getDefaultAmount());
+        user.getAccountList().add(newAccount);
+        session.getTransaction().commit();
+        session.close();
+//        List<Account> accountList = new ArrayList<>();
+//        accountList.add(accountService.createAccount(user));
+//        session.persist(user);
+//        session.getTransaction().commit();
+//        session.close();
 
-        return newUser;
+        return user;
+
     }
     //поиск пользователя по ID
-    public Optional<User> findUserById(int id) {
-        return Optional.ofNullable(userMap.get(id));
+    public Optional<User> findUserById(Long id) {
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        User user = session.get(User.class, id);
+        return Optional.ofNullable(user);
     }
+
+
     //Получение списка всех пользователей
     public List<User> getAll() {
-        return userMap.values().stream().toList();
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        return session.createQuery("SELECT e FROM User e ", User.class).list();
+
     }
 }
