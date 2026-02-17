@@ -12,6 +12,5 @@ public class App
                 new AnnotationConfigApplicationContext("school.sorokin.springcore");
         OperationConsoleListener operationConsoleListener = context.getBean(OperationConsoleListener.class);
         operationConsoleListener.engine();
-
     }
 }

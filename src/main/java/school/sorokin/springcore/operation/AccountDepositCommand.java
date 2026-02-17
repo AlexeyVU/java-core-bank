@@ -26,7 +26,7 @@ public class AccountDepositCommand implements OperationCommand {
     public void execute() {
 
         System.out.println("Enter ID account");
-        int accountToId = Integer.parseInt(scanner.nextLine());
+        long accountToId = Long.parseLong(scanner.nextLine());
         Account accountFrom = accountService.findAccountById(accountToId)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found"));
         System.out.println("create money count");

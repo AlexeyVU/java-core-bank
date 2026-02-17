@@ -1,24 +1,44 @@
 package school.sorokin.springcore.model;
-
+import jakarta.persistence.*;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
 
+
+@Table(name = "users")
+@Entity
 public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(name = "login")
+    private String login;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    private List<Account> accountList;
 
-    private final int id;
-    private final String login;
-    private final List<Account> accountList;
+    public User() {
+    }
 
 
-    public User(int id, String login, List<Account> accountList) {
+    public User(Long id, String login, List<Account> accountList) {
         this.id = id;
         this.login = login;
         this.accountList = accountList;
     }
 
 
-    public int getId() {
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    public void setAccountList(List<Account> accountList) {
+        this.accountList = accountList;
+    }
+
+    public Long getId() {
         return id;
     }
     public String getLogin() {
