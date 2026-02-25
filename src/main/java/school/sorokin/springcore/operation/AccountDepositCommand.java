@@ -33,9 +33,7 @@ public class AccountDepositCommand implements OperationCommand {
         BigDecimal money = BigDecimal.valueOf(Integer.parseInt(scanner.nextLine()));
         BigDecimal moneyAmount = accountFrom.getMoneyAmount().add(money);
         accountService.accountRepl(accountToId, money);
-
     }
-
     @Override
     public ConsoleOperationType getConsoleOperationType() {
         return ConsoleOperationType.ACCOUNT_DEPOSIT;

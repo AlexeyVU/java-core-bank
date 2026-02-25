@@ -2,7 +2,7 @@
 <project version="4">
   <component name="DBNavigator.Project.DataEditorManager">
     <record-view-column-sorting-type value="BY_INDEX" />
-    <value-preview-text-wrapping value="true" />
+    <value-preview-text-wrapping value="false" />
     <value-preview-pinned value="false" />
   </component>
   <component name="DBNavigator.Project.DatabaseBrowserManager">
@@ -15,16 +15,19 @@
     <connection id="c5479e9c-97ee-429d-86fd-c19e3b5238d7">
       <console name="pg-dev" type="STANDARD" schema="public" session="Main"><![CDATA[select * from accounts
 delete from accounts where id = 4
-select * from users]]></console>
+select * from users
+DELETE from users where id = 8;
+delete from accounts where id = 29;
+-- Очистка данных (сохранение структуры)
+delete from accounts where id between 14 and 28;
+delete from users where id between 1 and 7;]]></console>
     </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseEditorStateManager">
     <last-used-providers />
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
-    <open-files>
-      <object connection-id="c5479e9c-97ee-429d-86fd-c19e3b5238d7" object-ref="consoles/pg-dev" />
-    </open-files>
+    <open-files />
   </component>
   <component name="DBNavigator.Project.DatasetFilterManager">
     <filter-actions connection-id="c5479e9c-97ee-429d-86fd-c19e3b5238d7" dataset="information_schema.sql_features" active-filter-id="" />

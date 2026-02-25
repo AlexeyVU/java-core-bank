@@ -23,33 +23,38 @@ public class AccountService {
     private final AccountProperties accountProperties;
     private final UserService userService;
     private final SessionFactory sessionFactory;
+    private final TransactionHelper transactionHelper;
 
 
-    public AccountService(AccountProperties accountProperties, @Lazy UserService userService, SessionFactory sessionFactory) {
-
+    public AccountService(AccountProperties accountProperties, @Lazy UserService userService,
+                          SessionFactory sessionFactory, TransactionHelper transactionHelper) {
         this.accountProperties = accountProperties;
         this.userService = userService;
         this.sessionFactory = sessionFactory;
+        this.transactionHelper = transactionHelper;
     }
 
 
     //Создание счета
+
     public Account createAccount(User user) {
-        Session session = sessionFactory.openSession();
-        session.beginTransaction();
-        Account account = new Account(null, user, accountProperties.getDefaultAmount());
-        session.persist(account);
-        session.getTransaction().commit();
-        session.close();
-        return account;
+        return transactionHelper.executeInTransaction(() -> {
+            Session session = sessionFactory.getCurrentSession();
+            Account newAccount = new Account(null, user, accountProperties.getDefaultAmount());
+            session.persist(newAccount);
+            user.getAccountList().add(newAccount);
+            return newAccount;
+        });
     }
+
 
     //поиск счета по ID
     public Optional<Account> findAccountById(long accountId) {
-        Session session = sessionFactory.openSession();
-        session.beginTransaction();
-        Account account = session.get(Account.class, accountId);
-        return Optional.ofNullable(account);
+        return transactionHelper.executeInTransaction(() -> {
+            Session session = sessionFactory.getCurrentSession();
+            Account account = session.get(Account.class, accountId);
+            return Optional.ofNullable(account);
+        });
     }
 
     //пополнение счета
@@ -146,25 +151,23 @@ public class AccountService {
         Session session = sessionFactory.openSession();
         System.out.println("метка для сверки");
         List<Account> accountList = session.createQuery("SELECT a From Account a where a.user.id = :userId", Account.class)
-                        .setParameter("userId", userId)
-                        .getResultList();
+                .setParameter("userId", userId)
+                .getResultList();
 
         session.beginTransaction();
         session.getTransaction().commit();
         session.close();
         return accountList;
     }
+
     //Обновление сущности Account
     public void update(Account accountToUpdate, BigDecimal newAmount) {
-        try (Session session = sessionFactory.openSession()) {
-            Transaction tx = session.beginTransaction();
+        transactionHelper.executeInTransaction(() -> {
+            Session session = sessionFactory.getCurrentSession();
             Account managedAccount = session.merge(accountToUpdate);
             managedAccount.setMoneyAmount(newAmount);
-            tx.commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            return null;
+        });
     }
-
 }
 
