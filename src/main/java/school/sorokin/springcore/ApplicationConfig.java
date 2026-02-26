@@ -22,5 +22,4 @@ public class ApplicationConfig {
     public Scanner scanner() {
         return new Scanner(System.in);
     }
-
 }

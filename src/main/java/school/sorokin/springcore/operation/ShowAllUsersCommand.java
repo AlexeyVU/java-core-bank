@@ -1,11 +1,9 @@
 package school.sorokin.springcore.operation;
-
 import org.springframework.stereotype.Component;
 import school.sorokin.springcore.model.User;
 import school.sorokin.springcore.service.AccountService;
 import school.sorokin.springcore.service.ConsoleOperationType;
 import school.sorokin.springcore.service.UserService;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;

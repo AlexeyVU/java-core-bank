@@ -1,4 +1,11 @@
 package school.sorokin.springcore.service;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+
+import org.postgresql.core.Query;
+import org.hibernate.Transaction;
+
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import school.sorokin.springcore.AccountProperties;
@@ -12,36 +19,46 @@ import java.util.*;
 
 @Service
 public class AccountService {
-    private final Map<Integer, Account> accountMap;
-    private int idAccount;
+
     private final AccountProperties accountProperties;
-
     private final UserService userService;
+    private final SessionFactory sessionFactory;
+    private final TransactionHelper transactionHelper;
 
 
-
-    public AccountService(AccountProperties accountProperties, @Lazy UserService userService) {
-        this.accountMap = new HashMap<>();
-        this.idAccount = 0;
+    public AccountService(AccountProperties accountProperties, @Lazy UserService userService,
+                          SessionFactory sessionFactory, TransactionHelper transactionHelper) {
         this.accountProperties = accountProperties;
         this.userService = userService;
+        this.sessionFactory = sessionFactory;
+        this.transactionHelper = transactionHelper;
     }
-
 
 
     //Создание счета
+
     public Account createAccount(User user) {
-        idAccount++;
-        Account newAccount = new Account(idAccount, user.getId(), accountProperties.getDefaultAmount());
-        accountMap.put(idAccount, newAccount);
-        return newAccount;
+        return transactionHelper.executeInTransaction(() -> {
+            Session session = sessionFactory.getCurrentSession();
+            Account newAccount = new Account(null, user, accountProperties.getDefaultAmount());
+            session.persist(newAccount);
+            user.getAccountList().add(newAccount);
+            return newAccount;
+        });
     }
+
+
     //поиск счета по ID
-    public Optional<Account> findAccountById(int accountId) {
-       return Optional.ofNullable(accountMap.get(accountId));
+    public Optional<Account> findAccountById(long accountId) {
+        return transactionHelper.executeInTransaction(() -> {
+            Session session = sessionFactory.getCurrentSession();
+            Account account = session.get(Account.class, accountId);
+            return Optional.ofNullable(account);
+        });
     }
+
     //пополнение счета
-    public void accountRepl(int accountId, BigDecimal money) {
+    public void accountRepl(Long accountId, BigDecimal money) {
         Account account = findAccountById(accountId)
                 .orElseThrow(() -> new IllegalArgumentException("Account " + accountId + " not found"));
         if (money.compareTo(BigDecimal.ZERO) == 0) {
@@ -49,11 +66,13 @@ public class AccountService {
         }
         BigDecimal moneyAmount = account.getMoneyAmount().add(money);
         account.setMoneyAmount(moneyAmount);
+        update(account, moneyAmount);
         System.out.println("money has been added successfully");
 
     }
+
     //снятие средств
-    public void withDrawAccount(int accountId, BigDecimal money) {
+    public void withDrawAccount(Long accountId, BigDecimal money) {
         Account account = findAccountById(accountId)
                 .orElseThrow(() -> new IllegalArgumentException("Account " + accountId + " not found"));
         if (money.compareTo(BigDecimal.ZERO) <= 0) {
@@ -64,9 +83,11 @@ public class AccountService {
             throw new IllegalArgumentException("low of funds");
         }
         account.setMoneyAmount(moneyAmount);
+        update(account, moneyAmount);
     }
+
     //перевод средств между счетами
-    public void transfer(int fromAccountId, int toAccountId, BigDecimal money) {
+    public void transfer(Long fromAccountId, Long toAccountId, BigDecimal money) {
         Account fromAccount = findAccountById(fromAccountId)
                 .orElseThrow(() -> new IllegalArgumentException("Account " + fromAccountId + " not found"));
         if (money.compareTo(BigDecimal.ZERO) <= 0) {
@@ -82,39 +103,71 @@ public class AccountService {
                 .orElseThrow(() -> new IllegalArgumentException("Account " + fromAccountId + " not found"));
         BigDecimal toMoneyAmount = toAccount.getMoneyAmount().add(money);
         fromAccount.setMoneyAmount(fromMoneyAmount);
+        update(fromAccount, fromMoneyAmount);
         toAccount.setMoneyAmount(toMoneyAmount);
+        update(toAccount, toMoneyAmount);
     }
 
     //зкрытие счета
-    public Account deleteAccount(int accountId) {
+    public Account deleteAccount(Long accountId) {
         Account deleteAccount = findAccountById(accountId)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found"));
-        List<Account> accountList = getAllUsersAccount(deleteAccount.getUserId());
+        List<Account> accountList = getAllUsersAccount(deleteAccount.getUser().getId());
         if (accountList.size() <= 1) {
             throw new IllegalArgumentException("The single account cannot be deleted");
         }
-        accountMap.remove(accountId);
         Account firstElement = accountList.get(0);
         BigDecimal countAccountFirstElement = deleteAccount.getMoneyAmount().add(firstElement.getMoneyAmount());
         BigDecimal countAccountSecondElement = deleteAccount.getMoneyAmount().add(firstElement.getMoneyAmount());
         Account secondElement = accountList.get(1);
-        if (firstElement.getId() == accountId) {
+        if (firstElement.getId().equals(accountId)) {
             secondElement.setMoneyAmount(countAccountFirstElement);
-            User user = userService.findUserById(secondElement.getUserId())
-                            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            update(secondElement, countAccountFirstElement);
+            User user = userService.findUserById(secondElement.getUser().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            Session session = sessionFactory.openSession();
             user.getAccountList().remove(firstElement);
+            session.remove(firstElement);
+            session.beginTransaction();
+            session.getTransaction().commit();
+            session.close();
         } else {
             firstElement.setMoneyAmount(countAccountSecondElement);
-            User user = userService.findUserById(firstElement.getUserId())
-                            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            update(firstElement, countAccountSecondElement);
+            User user = userService.findUserById(firstElement.getUser().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            Session session = sessionFactory.openSession();
             user.getAccountList().remove(deleteAccount);
+            session.remove(deleteAccount);
+            session.beginTransaction();
+            session.getTransaction().commit();
+            session.close();
         }
         return deleteAccount;
     }
 
 
-    public List<Account> getAllUsersAccount(int userId) {
-        return accountMap.values().stream().toList();
-        }
+    public List<Account> getAllUsersAccount(Long userId) {
+        Session session = sessionFactory.openSession();
+        System.out.println("метка для сверки");
+        List<Account> accountList = session.createQuery("SELECT a From Account a where a.user.id = :userId", Account.class)
+                .setParameter("userId", userId)
+                .getResultList();
+
+        session.beginTransaction();
+        session.getTransaction().commit();
+        session.close();
+        return accountList;
     }
+
+    //Обновление сущности Account
+    public void update(Account accountToUpdate, BigDecimal newAmount) {
+        transactionHelper.executeInTransaction(() -> {
+            Session session = sessionFactory.getCurrentSession();
+            Account managedAccount = session.merge(accountToUpdate);
+            managedAccount.setMoneyAmount(newAmount);
+            return null;
+        });
+    }
+}
 

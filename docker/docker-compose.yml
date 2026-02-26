@@ -1,0 +1,27 @@
+  version: "1"
+  services:
+    pg-dev:
+      container_name: pg-dev
+      image: postgres:15
+      restart: always
+      ports:
+        - 5531:5432
+      environment:
+        - POSTGRES_USER=pg-dev
+        - POSTGRES_PASSWORD=password
+        - PGDATA=/var/lib/pgsql/data
+        - POSTGRES_DB=pg-dev
+      healthcheck:
+        test: [ "CMD-SHELL", "pg_isready" ]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+
+  #    postgres:
+#      image: "postgres"
+#      container_name: "hibernate-postgres"
+#      ports:
+#        - "5432:5432"
+#      environment:
+#        - POSTGRES_USER=user
+#        - POSTGRES_PASSWORD=root

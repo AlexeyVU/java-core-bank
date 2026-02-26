@@ -2,7 +2,6 @@ package school.sorokin.springcore;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import java.math.BigDecimal;
 
 @Component
@@ -19,7 +18,6 @@ public class AccountProperties {
     public BigDecimal getDefaultAmount() {
         return defaultAmount;
     }
-
     public double getTransferCommission() {
         return transferCommission;
     }

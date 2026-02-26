@@ -1,46 +1,59 @@
 package school.sorokin.springcore.service;
 
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import school.sorokin.springcore.AccountProperties;
 import school.sorokin.springcore.model.Account;
 import school.sorokin.springcore.model.User;
-
+import java.util.Optional;
 import java.util.*;
+import java.util.function.Supplier;
+
 @Service
 public class UserService {
-    private final Map<Integer, User> userMap;
-    private final Set<String> loginUser;
-
     private final AccountService accountService;
-    private int idCount;
+    private final SessionFactory sessionFactory;
+    private final AccountProperties accountProperties;
+    private final TransactionHelper transactionHelper;
 
-    public UserService(AccountService accountService) {
+
+    public UserService(AccountService accountService, SessionFactory sessionFactory,
+                       AccountProperties accountProperties, TransactionHelper transactionHelper) {
         this.accountService = accountService;
-        this.userMap = new HashMap<>();
-        this.idCount = 0;
-        this.loginUser = new HashSet<>();
+        this.sessionFactory = sessionFactory;
+        this.accountProperties = accountProperties;
+        this.transactionHelper = transactionHelper;
+
     }
     //Создание пользователя
     public User createUser(String login) {
-        if (loginUser.contains(login)) {
-            throw new IllegalArgumentException("User is exist");
-        }
-        loginUser.add(login);
-        idCount++;
-        User newUser = new User(idCount, login, new ArrayList<>());
-        Account newAccount = accountService.createAccount(newUser);
-        newUser.getAccountList().add(newAccount);
-        userMap.put(idCount, newUser);
-        System.out.println();
-
-        return newUser;
+        return transactionHelper.executeInTransaction(() -> {
+            Session session = sessionFactory.getCurrentSession();
+            User user = new User(null, login, new ArrayList<>());
+            session.persist(user);
+            Account newAccount = new Account(null, user, accountProperties.getDefaultAmount());
+            user.getAccountList().add(newAccount);
+            return user;
+        });
     }
     //поиск пользователя по ID
-    public Optional<User> findUserById(int id) {
-        return Optional.ofNullable(userMap.get(id));
+    public Optional<User> findUserById(Long id) {
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        User user = session.get(User.class, id);
+        return Optional.ofNullable(user);
     }
+
+
     //Получение списка всех пользователей
     public List<User> getAll() {
-        return userMap.values().stream().toList();
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        return session.createQuery("SELECT e FROM User e ", User.class).list();
     }
 }

@@ -26,16 +26,14 @@ public class AccountDepositCommand implements OperationCommand {
     public void execute() {
 
         System.out.println("Enter ID account");
-        int accountToId = Integer.parseInt(scanner.nextLine());
+        long accountToId = Long.parseLong(scanner.nextLine());
         Account accountFrom = accountService.findAccountById(accountToId)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found"));
         System.out.println("create money count");
         BigDecimal money = BigDecimal.valueOf(Integer.parseInt(scanner.nextLine()));
         BigDecimal moneyAmount = accountFrom.getMoneyAmount().add(money);
         accountService.accountRepl(accountToId, money);
-
     }
-
     @Override
     public ConsoleOperationType getConsoleOperationType() {
         return ConsoleOperationType.ACCOUNT_DEPOSIT;
