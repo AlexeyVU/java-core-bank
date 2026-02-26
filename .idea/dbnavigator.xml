@@ -27,7 +27,9 @@ delete from users where id between 1 and 7;]]></console>
     <last-used-providers />
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
-    <open-files />
+    <open-files>
+      <object connection-id="c5479e9c-97ee-429d-86fd-c19e3b5238d7" object-ref="consoles/pg-dev" />
+    </open-files>
   </component>
   <component name="DBNavigator.Project.DatasetFilterManager">
     <filter-actions connection-id="c5479e9c-97ee-429d-86fd-c19e3b5238d7" dataset="information_schema.sql_features" active-filter-id="" />
